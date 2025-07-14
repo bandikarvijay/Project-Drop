@@ -14,7 +14,7 @@ const app = express();
 
 // ✅ CORS Middleware (Updated to allow frontend requests)
 app.use(cors({
-  origin: 'http://localhost:3000', // React frontend
+  origin: 'https://project-drop-five.vercel.app', // React frontend
   credentials: true
 }));
 
