@@ -44,16 +44,14 @@ function WebPage() {
     }
   };
 
-const fetchAllProjects = async () => {
-  try {
-    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Web');
-    setAllProjects(res.data);
-  } catch (err) {
-    console.error('Error fetching Web projects', err);
-  }
-};
-
-
+  const fetchAllProjects = async () => {
+    try {
+      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Web');
+      setAllProjects(res.data);
+    } catch (err) {
+      console.error('Error fetching Web projects', err);
+    }
+  };
 
   useEffect(() => {
     fetchAllProjects();
@@ -64,9 +62,9 @@ const fetchAllProjects = async () => {
       {/* Navbar */}
       <nav className="web-navbar">
         <div className="web-navbar-left">
-  <img src="/images/pd logo.png" alt="Logo" className="navbar-logo" />
-  <h3>Project Drop - Web</h3>
-</div>
+          <img src="/images/pd logo.png" alt="Logo" className="navbar-logo" />
+          <h3>Project Drop - Web</h3>
+        </div>
         <div className="web-navbar-center">
           <input
             type="text"
@@ -147,7 +145,7 @@ const fetchAllProjects = async () => {
                 </div>
 
                 <a
-                  href={`https://project-drop-backend.onrender.com${project.fileUrl}`}
+                  href={`https://project-drop-backend.onrender.com/${project.fileUrl}`} // ✅ fixed: added slash
                   download
                 >
                   Download Project
