@@ -44,16 +44,14 @@ function MobilePage() {
     }
   };
 
-const fetchAllProjects = async () => {
-  try {
-    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
-    setAllProjects(res.data);
-  } catch (err) {
-    console.error('Error fetching Mobile projects', err);
-  }
-};
-
-
+  const fetchAllProjects = async () => {
+    try {
+      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
+      setAllProjects(res.data);
+    } catch (err) {
+      console.error('Error fetching Mobile projects', err);
+    }
+  };
 
   useEffect(() => {
     fetchAllProjects();
@@ -64,9 +62,9 @@ const fetchAllProjects = async () => {
       {/* Navbar */}
       <nav className="web-navbar">
         <div className="web-navbar-left">
-  <img src="/images/pd logo.png" alt="Logo" className="navbar-logo" />
-  <h3>Project Drop - Mobile</h3>
-</div>
+          <img src="/images/pd logo.png" alt="Logo" className="navbar-logo" />
+          <h3>Project Drop - Mobile</h3>
+        </div>
         <div className="web-navbar-center">
           <input
             type="text"
@@ -93,6 +91,7 @@ const fetchAllProjects = async () => {
               onChange={(e) => setTitle(e.target.value)}
               required
             />
+
             <label>Choose Thumbnail Images (multiple):</label>
             <input
               type="file"
@@ -101,6 +100,7 @@ const fetchAllProjects = async () => {
               onChange={(e) => setThumbnails(e.target.files)}
               required
             />
+
             <label>Choose ZIP Folder (Project):</label>
             <input
               type="file"
@@ -108,13 +108,14 @@ const fetchAllProjects = async () => {
               onChange={(e) => setProjectFile(e.target.files[0])}
               required
             />
+
             <button type="submit">Submit</button>
           </form>
         </div>
       </div>
 
       {/* Display All Mobile Projects */}
-      <h3 style={{ marginTop: '40px', textAlign: 'center' }}>📁 All Uploaded Mobile Projects</h3>
+      <h3 style={{ marginTop: '40px', textAlign: 'center' }}>📱 All Uploaded Mobile Projects</h3>
       <div className="web-project-list">
         {allProjects.length === 0 ? (
           <p style={{ textAlign: 'center' }}>No public projects available.</p>
@@ -123,7 +124,20 @@ const fetchAllProjects = async () => {
             .filter((p) => p.title.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((project) => (
               <div key={project._id} className="web-project-card">
+
+                {/* ✅ Show first thumbnail */}
+                {project.thumbnails && project.thumbnails.length > 0 ? (
+                  <img
+                    src={`https://project-drop-backend.onrender.com${project.thumbnails[0]}`}
+                    alt="Project Thumbnail"
+                    className="project-thumbnail"
+                  />
+                ) : (
+                  <div className="project-thumbnail placeholder">No Image</div>
+                )}
+
                 <h4>{project.title}</h4>
+
                 <div style={{ fontSize: '0.9rem', color: '#888' }}>
                   {project.uploadedBy?.name && (
                     <p>Uploaded by: <strong>{project.uploadedBy.name}</strong></p>
@@ -141,7 +155,8 @@ const fetchAllProjects = async () => {
                     </p>
                   )}
                 </div>
-                <a href={`https://project-drop-backend.onrender.com${project.fileUrl}`} download>
+
+                <a href={`https://project-drop-backend.onrender.com/${project.fileUrl}`} download>
                   Download Project
                 </a>
               </div>
