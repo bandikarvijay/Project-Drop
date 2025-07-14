@@ -11,7 +11,7 @@ function Login() {
   const handleSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const res = await axios.post('http://localhost:5000/api/auth/google-login', {
+      const res = await axios.post('https://project-drop-backend.onrender.com/api/auth/google-login', {
         name: decoded.name,
         email: decoded.email,
         googleId: decoded.sub,

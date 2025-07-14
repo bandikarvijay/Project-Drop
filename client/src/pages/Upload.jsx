@@ -16,7 +16,7 @@ function Upload() {
     formData.append('file', file);
 
     try {
-      await axios.post('http://localhost:5000/api/projects/upload', formData, {
+      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',

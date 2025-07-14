@@ -28,7 +28,7 @@ function WebPage() {
     formData.append('file', projectFile);
 
     try {
-      await axios.post('http://localhost:5000/api/projects/upload', formData, {
+      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -46,7 +46,7 @@ function WebPage() {
 
 const fetchAllProjects = async () => {
   try {
-    const res = await axios.get('http://localhost:5000/api/projects?category=Web');
+    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Web');
     setAllProjects(res.data);
   } catch (err) {
     console.error('Error fetching Web projects', err);
@@ -147,7 +147,7 @@ const fetchAllProjects = async () => {
                 </div>
 
                 <a
-                  href={`http://localhost:5000${project.fileUrl}`}
+                  href={`https://project-drop-backend.onrender.com${project.fileUrl}`}
                   download
                 >
                   Download Project
