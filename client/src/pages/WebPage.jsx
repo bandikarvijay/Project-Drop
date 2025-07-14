@@ -126,17 +126,16 @@ function WebPage() {
               <div key={project._id} className="web-project-card">
 
                 {/* ✅ Thumbnail Display */}
-                {project.thumbnails && project.thumbnails.length > 0 ? (
-                  <img
-                    src={`https://project-drop-backend.onrender.com${project.thumbnails[0]}`}
-                    alt="Project Thumbnail"
-                    className="project-thumbnail"
-                  />
-                ) : (
-                  <div className="project-thumbnail placeholder">No Image</div>
-                )}
+              <div key={project._id} className="web-project-card">
+  {project.thumbnails && project.thumbnails.length > 0 && (
+    <img
+      src={`https://project-drop-backend.onrender.com${project.thumbnails[0]}`}
+      alt="Thumbnail"
+      className="project-thumbnail"
+    />
+  )}
+  <h4>{project.title}</h4>
 
-                <h4>{project.title}</h4>
 
                 <div style={{ fontSize: '0.9rem', color: '#888' }}>
                   {project.uploadedBy?.name && (
