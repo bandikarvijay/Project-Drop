@@ -8,7 +8,7 @@ const protect = require('../middleware/auth');
 const router = express.Router();
 
 // Ensure upload folders exist
-['server/uploads/thumbnails', 'server/uploads/files'].forEach(folder => {
+['/uploads/thumbnails', '/uploads/files'].forEach(folder => {
   if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
 });
 
@@ -16,9 +16,9 @@ const router = express.Router();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'thumbnail') {
-      cb(null, 'server/uploads/thumbnails');
+      cb(null, '/uploads/thumbnails');
     } else if (file.fieldname === 'file') {
-      cb(null, 'server/uploads/files');  // ✅ Correct path
+      cb(null, '/uploads/files');  // ✅ Correct path
     }
   },
   filename: (req, file, cb) => {
