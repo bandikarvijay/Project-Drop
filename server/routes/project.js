@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
     if (file.fieldname === 'thumbnail') {
       cb(null, 'uploads/thumbnails');
     } else if (file.fieldname === 'file') {
-      cb(null, 'uploads/files');  // ✅ Correct path
+      cb(null, 'uploads/files');
     }
   },
   filename: (req, file, cb) => {
@@ -26,7 +26,6 @@ const storage = multer.diskStorage({
     cb(null, `${uniqueName}${path.extname(file.originalname)}`);
   },
 });
-
 
 const upload = multer({ storage });
 
@@ -47,8 +46,9 @@ router.post(
       const thumbnails = req.files.thumbnail || [];
       const file = req.files.file?.[0];
 
+      // ✅ Use correct URL format starting with /uploads/...
       const thumbnailPaths = thumbnails.map((t) => `/uploads/thumbnails/${t.filename}`);
-      const fileUrl = file ? `uploads/files/${file.filename}` : '';
+      const fileUrl = file ? `/uploads/files/${file.filename}` : '';
 
       const project = await Project.create({
         title,
@@ -61,7 +61,7 @@ router.post(
 
       res.status(201).json(project);
     } catch (err) {
-      console.error(err);
+      console.error('Upload error:', err);
       res.status(500).json({ message: 'Upload failed' });
     }
   }
@@ -70,7 +70,6 @@ router.post(
 /**
  * ✅ GET /api/projects
  * Fetch all projects, optionally filtered by category
- * Example: /api/projects?category=Web
  */
 router.get('/', async (req, res) => {
   try {
@@ -83,7 +82,7 @@ router.get('/', async (req, res) => {
 
     res.json(projects);
   } catch (err) {
-    console.error('Fetch failed', err);
+    console.error('Fetch failed:', err);
     res.status(500).json({ message: 'Fetch failed' });
   }
 });
@@ -99,7 +98,7 @@ router.get('/mine', protect, async (req, res) => {
 
     res.json(projects);
   } catch (err) {
-    console.error('Fetching user projects failed', err);
+    console.error('Fetching user projects failed:', err);
     res.status(500).json({ message: 'Fetching your projects failed' });
   }
 });
