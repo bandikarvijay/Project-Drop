@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
     if (file.fieldname === 'thumbnail') {
       cb(null, 'server/uploads/thumbnails');
     } else if (file.fieldname === 'file') {
-      cb(null, 'server/uploads/files');
+      cb(null, 'server/uploads/files');  // ✅ Correct path
     }
   },
   filename: (req, file, cb) => {
@@ -26,6 +26,7 @@ const storage = multer.diskStorage({
     cb(null, `${uniqueName}${path.extname(file.originalname)}`);
   },
 });
+
 
 const upload = multer({ storage });
 
