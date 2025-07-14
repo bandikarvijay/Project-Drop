@@ -8,7 +8,7 @@ const protect = require('../middleware/auth');
 const router = express.Router();
 
 // Ensure upload folders exist
-['/uploads/thumbnails', '/uploads/files'].forEach(folder => {
+['uploads/thumbnails', 'uploads/files'].forEach(folder => {
   if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
 });
 
@@ -16,9 +16,9 @@ const router = express.Router();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'thumbnail') {
-      cb(null, '/uploads/thumbnails');
+      cb(null, 'uploads/thumbnails');
     } else if (file.fieldname === 'file') {
-      cb(null, '/uploads/files');  // ✅ Correct path
+      cb(null, 'uploads/files');  // ✅ Correct path
     }
   },
   filename: (req, file, cb) => {
@@ -48,7 +48,7 @@ router.post(
       const file = req.files.file?.[0];
 
       const thumbnailPaths = thumbnails.map((t) => `/uploads/thumbnails/${t.filename}`);
-      const fileUrl = file ? `/uploads/files/${file.filename}` : '';
+      const fileUrl = file ? `uploads/files/${file.filename}` : '';
 
       const project = await Project.create({
         title,
