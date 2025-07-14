@@ -3,41 +3,44 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
-// Load environment variables
+// Load env variables
 dotenv.config();
 
 // Connect to MongoDB
 connectDB();
 
+// Initialize app
 const app = express();
 
-// ✅ CORS Middleware (Updated to allow frontend requests)
+// Create upload folders if they don't exist
+['uploads', 'uploads/files', 'uploads/thumbnails'].forEach((dir) => {
+  const dirPath = path.join(__dirname, dir);
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+});
+
+// CORS for Vercel frontend
 app.use(cors({
-  origin: 'https://project-drop-five.vercel.app', // React frontend
+  origin: 'https://project-drop-five.vercel.app',
   credentials: true
 }));
 
-// Middleware to parse JSON requests
+// Parse JSON
 app.use(express.json());
 
-// ✅ Serve static files (e.g. project uploads)
+// Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ API Routes
-const authRoutes = require('./routes/auth'); // Google login
-const projectRoutes = require('./routes/project'); // Project uploads
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/projects', require('./routes/project'));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/projects', projectRoutes);
-
-// ✅ Test route to confirm server is running
+// Test route
 app.get('/', (req, res) => {
   res.send('✅ Project Drop API is running...');
 });
 
-// ✅ Start server
+// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
