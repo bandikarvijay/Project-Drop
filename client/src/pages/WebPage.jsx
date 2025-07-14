@@ -1,3 +1,4 @@
+// src/pages/WebPage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +10,6 @@ function WebPage() {
   const [thumbnails, setThumbnails] = useState([]);
   const [projectFile, setProjectFile] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
-
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -39,7 +39,7 @@ function WebPage() {
       setThumbnails([]);
       setProjectFile(null);
       fetchAllProjects();
-    } catch (err) {
+    } catch {
       alert('Upload failed!');
     }
   };
@@ -59,7 +59,6 @@ function WebPage() {
 
   return (
     <div>
-      {/* Navbar */}
       <nav className="web-navbar">
         <div className="web-navbar-left">
           <img src="/images/pd logo.png" alt="Logo" className="navbar-logo" />
@@ -79,42 +78,20 @@ function WebPage() {
         </div>
       </nav>
 
-      {/* Upload Form */}
       <div className="web-main-container">
         <div className="web-upload-container">
           <h2 className="web-heading">Upload Your Web Project</h2>
           <form onSubmit={handleSubmit} className="web-upload-box">
-            <input
-              type="text"
-              placeholder="Project Heading"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-
+            <input type="text" placeholder="Project Heading" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <label>Choose Thumbnail Images (multiple):</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => setThumbnails(e.target.files)}
-              required
-            />
-
+            <input type="file" accept="image/*" multiple onChange={(e) => setThumbnails(e.target.files)} required />
             <label>Choose ZIP Folder (Project):</label>
-            <input
-              type="file"
-              accept=".zip"
-              onChange={(e) => setProjectFile(e.target.files[0])}
-              required
-            />
-
+            <input type="file" accept=".zip" onChange={(e) => setProjectFile(e.target.files[0])} required />
             <button type="submit">Submit</button>
           </form>
         </div>
       </div>
 
-      {/* All Web Projects */}
       <h3 style={{ marginTop: '40px', textAlign: 'center' }}>📁 All Uploaded Web Projects</h3>
       <div className="web-project-list">
         {allProjects.length === 0 ? (
@@ -125,31 +102,16 @@ function WebPage() {
             .map((project) => (
               <div key={project._id} className="web-project-card">
                 <h4>{project.title}</h4>
-
                 <div style={{ fontSize: '0.9rem', color: '#888' }}>
-                  {project.uploadedBy?.name && (
-                    <p>Uploaded by: <strong>{project.uploadedBy.name}</strong></p>
-                  )}
+                  {project.uploadedBy?.name && <p>Uploaded by: <strong>{project.uploadedBy.name}</strong></p>}
                   {project.createdAt && (
                     <p>
                       Uploaded on:{' '}
-                      <strong>
-                        {new Date(project.createdAt).toLocaleDateString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </strong>
+                      <strong>{new Date(project.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
                     </p>
                   )}
                 </div>
-
-                <a
-                  href={`https://project-drop-backend.onrender.com/${project.fileUrl}`} // ✅ fixed: added slash
-                  download
-                >
-                  Download Project
-                </a>
+                <a href={`https://project-drop-backend.onrender.com/${project.fileUrl}`} download>Download Project</a>
               </div>
             ))
         )}
