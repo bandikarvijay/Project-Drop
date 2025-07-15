@@ -9,7 +9,7 @@ const DataPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const fetchProjects = async () => {
-    const res = await axios.get('/api/projects?category=Data');
+    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Data');
     setProjects(res.data);
   };
 
