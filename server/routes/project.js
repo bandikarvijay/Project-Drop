@@ -7,40 +7,43 @@ const protect = require('../middleware/auth');
 
 const router = express.Router();
 
-// Ensure folders exist
-['uploads/thumbnails', 'uploads/files'].forEach(f => {
-  if (!fs.existsSync(f)) fs.mkdirSync(f, { recursive: true });
+['uploads/thumbnails', 'uploads/files'].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// Multer config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null,
-      file.fieldname === 'thumbnail'
-        ? 'uploads/thumbnails'
-        : 'uploads/files'
-    );
+    const dest = file.fieldname === 'thumbnail' ? 'uploads/thumbnails' : 'uploads/files';
+    cb(null, dest);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now()+'-'+Math.random().toString().slice(2)+path.extname(file.originalname));
+    const name = `${Date.now()}-${file.originalname}`;
+    cb(null, name);
   }
 });
+
 const upload = multer({ storage });
 
 router.post('/upload', protect, upload.fields([
   { name: 'thumbnail', maxCount: 10 },
-  { name: 'file', maxCount: 1 },
+  { name: 'file', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { title, description, category } = req.body;
-    const thumbnails = req.files.thumbnail || [];
-    const file = req.files.file?.[0];
+    const { title, category } = req.body;
+    const file = req.files?.file?.[0];
+    const thumbnails = req.files?.thumbnail || [];
+
     const thumbnailPaths = thumbnails.map(t => `/uploads/thumbnails/${t.filename}`);
     const fileUrl = file ? `/uploads/files/${file.filename}` : '';
+
     const project = await Project.create({
-      title, description, category, thumbnails: thumbnailPaths,
-      fileUrl, uploadedBy: req.user.id
+      title,
+      category,
+      thumbnails: thumbnailPaths,
+      fileUrl,
+      uploadedBy: req.user.id
     });
+
     res.status(201).json(project);
   } catch (err) {
     console.error(err);
@@ -48,7 +51,6 @@ router.post('/upload', protect, upload.fields([
   }
 });
 
-// Get projects optionally filtered by category
 router.get('/', async (req, res) => {
   try {
     const filter = req.query.category ? { category: req.query.category } : {};
@@ -62,7 +64,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get only current user's projects
 router.get('/mine', protect, async (req, res) => {
   try {
     const projects = await Project.find({ uploadedBy: req.user.id })
