@@ -28,11 +28,12 @@ const WebPage = () => {
 
     try {
       await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+  headers: {
+    'Content-Type': 'multipart/form-data',
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  },
+});
+
       setTitle('');
       setThumbnails([]);
       setProjectFile(null);
