@@ -9,7 +9,7 @@ const MobilePage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const fetchProjects = async () => {
-    const res = await axios.get('/api/projects?category=Mobile');
+    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
     setProjects(res.data);
   };
 
