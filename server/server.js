@@ -21,10 +21,19 @@ const app = express();
 });
 
 // CORS for Vercel frontend
+const allowedOrigins = ['https://project-drop-five.vercel.app'];
+
 app.use(cors({
-  origin: 'https://project-drop-five.vercel.app',
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
+
 
 // Parse JSON
 app.use(express.json());
