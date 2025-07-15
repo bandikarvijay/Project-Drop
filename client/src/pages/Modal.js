@@ -2,10 +2,8 @@ import React from 'react';
 import './Modal.css';
 
 const Modal = ({ image, onClose }) => (
-  <div className="modal-backdrop" onClick={onClose}>
-    <div className="modal-image-wrapper">
-      <img src={image} alt="Preview" />
-    </div>
+  <div className="modal-overlay" onClick={onClose}>
+    <img src={image} alt="Full Preview" className="modal-image" />
   </div>
 );
 
