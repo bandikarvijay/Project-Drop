@@ -28,7 +28,7 @@ function MobilePage() {
     formData.append('file', projectFile);
 
     try {
-      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
+      await axios.post('https://noble-transformation-production-ba33.up.railway.app//api/projects/upload', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -46,7 +46,7 @@ function MobilePage() {
 
   const fetchAllProjects = async () => {
     try {
-      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
+      const res = await axios.get('https://noble-transformation-production-ba33.up.railway.app//api/projects?category=Mobile');
       setAllProjects(res.data);
     } catch (err) {
       console.error('Error fetching Mobile projects', err);
