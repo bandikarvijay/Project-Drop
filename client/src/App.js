@@ -13,6 +13,7 @@ import Upload from './pages/Upload';
 import WebPage from './pages/WebPage';
 import DataPage from './pages/DataPage';
 import MobilePage from './pages/MobilePage';
+import MobilePage from './pages/Modal.js';
 
 function AppLayout() {
   const location = useLocation();
@@ -34,6 +35,7 @@ function AppLayout() {
           <Route path="/web" element={<WebPage />} />
           <Route path="/data" element={<DataPage />} />
           <Route path="/mobile" element={<MobilePage />} />
+          <Route path="/mobile" element={<Modal.js />} />
         </Routes>
       </div>
 
