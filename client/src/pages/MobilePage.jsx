@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './Page.css'; // shared CSS styles
+import './Page.css'; // shared styles
 import { FiDownload } from 'react-icons/fi';
 import Modal from './Modal';
 
@@ -9,30 +9,37 @@ const MobilePage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const fetchProjects = async () => {
-    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
-    setProjects(res.data);
+    try {
+      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Mobile');
+      setProjects(res.data);
+    } catch (err) {
+      console.error('Error fetching Mobile projects:', err);
+    }
   };
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    const thumbnail = e.target.files[1] || null;
+    const files = e.target.files;
     const formData = new FormData();
     formData.append('category', 'Mobile');
-    formData.append('projectFile', file);
-    if (thumbnail) formData.append('thumbnail', thumbnail);
-
-    await axios.post('/api/projects', formData);
-    fetchProjects();
+    if (files[0]) formData.append('projectFile', files[0]);
+    if (files[1]) formData.append('thumbnail', files[1]);
+    try {
+      await axios.post('https://project-drop-backend.onrender.com/api/projects', formData);
+      fetchProjects();
+    } catch (err) {
+      console.error('Upload error:', err);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     const file = e.dataTransfer.files[0];
     const formData = new FormData();
     formData.append('category', 'Mobile');
     formData.append('projectFile', file);
-    axios.post('/api/projects', formData).then(fetchProjects);
+    axios.post('https://project-drop-backend.onrender.com/api/projects', formData)
+      .then(fetchProjects)
+      .catch(err => console.error('Drop upload error:', err));
   };
 
   useEffect(() => {
@@ -41,23 +48,36 @@ const MobilePage = () => {
 
   return (
     <div onDragOver={e => e.preventDefault()} onDrop={handleDrop}>
-      <h2>Mobile Projects</h2>
-      <input type="file" onChange={handleFileUpload} />
+      <h2 style={{ textAlign: 'center', marginTop: 30 }}>📱 Mobile Projects</h2>
+
+      <div style={{ textAlign: 'center', margin: '20px auto' }}>
+        <input type="file" onChange={handleFileUpload} multiple />
+        <p>📥 Drag and drop a file or select manually (first = file, second = thumbnail)</p>
+      </div>
+
       <div className="project-grid">
-        {projects.map((p) => (
-          <div key={p._id} className="project-card">
-            <img src={p.thumbnailUrl} alt="thumb" onClick={() => setSelectedImage(p.thumbnailUrl)} />
+        {projects.map((project) => (
+          <div key={project._id} className="project-card">
+            <img
+              src={project.thumbnailUrl}
+              alt="thumbnail"
+              onClick={() => setSelectedImage(project.thumbnailUrl)}
+              style={{ cursor: 'pointer' }}
+            />
             <div className="project-info">
-              <p>{p.uploader}</p>
-              <p>{new Date(p.date).toLocaleDateString()}</p>
-              <a href={p.fileUrl} download>
+              <p>{project.uploadedBy?.name || 'Anonymous'}</p>
+              <p>{new Date(project.createdAt).toLocaleDateString()}</p>
+              <a href={project.fileUrl} download>
                 <FiDownload size={20} />
               </a>
             </div>
           </div>
         ))}
       </div>
-      {selectedImage && <Modal image={selectedImage} onClose={() => setSelectedImage(null)} />}
+
+      {selectedImage && (
+        <Modal image={selectedImage} onClose={() => setSelectedImage(null)} />
+      )}
     </div>
   );
 };
