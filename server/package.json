@@ -1,16 +1,17 @@
 {
-  "name": "projectdrop-backend",
+  "name": "project-drop-backend",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.x.x",
-    "dotenv": "^16.x.x",
-    "express": "^4.x.x",
-    "jsonwebtoken": "^9.x.x",
-    "mongoose": "^7.x.x",
-    "multer": "^1.x.x"
+    "express": "^4.18.2",
+    "firebase-admin": "^11.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "mongoose": "^7.0.1",
+    "multer": "^1.4.5-lts.1"
   }
 }
