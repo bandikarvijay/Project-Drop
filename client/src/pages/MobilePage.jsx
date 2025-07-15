@@ -27,12 +27,17 @@ const MobilePage = () => {
     formData.append('file', projectFile);
 
     try {
-      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
-});
+await axios.post(
+  'https://project-drop-backend.onrender.com/api/projects/upload',
+  formData,
+  {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  }
+);
+
 
       setTitle('');
       setThumbnails([]);
