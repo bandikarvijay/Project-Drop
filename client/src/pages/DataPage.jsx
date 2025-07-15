@@ -28,7 +28,7 @@ function DataPage() {
     formData.append('file', projectFile);
 
     try {
-      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
+      await axios.post('https://noble-transformation-production-ba33.up.railway.app//api/projects/upload', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -46,7 +46,7 @@ function DataPage() {
 
   const fetchAllProjects = async () => {
     try {
-      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Data');
+      const res = await axios.get('https://noble-transformation-production-ba33.up.railway.app//api/projects?category=Data');
       setAllProjects(res.data);
     } catch (err) {
       console.error('Error fetching Data projects', err);
@@ -128,7 +128,7 @@ function DataPage() {
                 {/* ✅ Thumbnail Display */}
                 {project.thumbnails && project.thumbnails.length > 0 ? (
                   <img
-                    src={`https://project-drop-backend.onrender.com${project.thumbnails[0]}`}
+                    src={`https://noble-transformation-production-ba33.up.railway.app/${project.thumbnails[0]}`}
                     alt="Project Thumbnail"
                     className="project-thumbnail"
                   />
@@ -156,7 +156,7 @@ function DataPage() {
                   )}
                 </div>
 
-                <a href={`https://project-drop-backend.onrender.com/${project.fileUrl}`} download>
+                <a href={`https://noble-transformation-production-ba33.up.railway.app//${project.fileUrl}`} download>
                   Download Project
                 </a>
               </div>
