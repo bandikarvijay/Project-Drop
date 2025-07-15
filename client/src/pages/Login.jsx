@@ -8,6 +8,7 @@ const handleSuccess = async (credentialResponse) => {
     });
 
     localStorage.setItem('token', res.data.token);
+    // ✅ Only navigation, no alert
     navigate(location.state?.redirectTo || '/');
   } catch (err) {
     console.error('Google login error:', err);
