@@ -28,7 +28,7 @@ function WebPage() {
     formData.append('file', projectFile);
 
     try {
-      await axios.post('https://project-drop-backend.onrender.com/api/projects/upload', formData, {
+      await axios.post('https://noble-transformation-production-ba33.up.railway.app//api/projects/upload', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -46,7 +46,7 @@ function WebPage() {
 
   const fetchAllProjects = async () => {
     try {
-      const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Web');
+      const res = await axios.get('https://noble-transformation-production-ba33.up.railway.app//api/projects?category=Web');
       setAllProjects(res.data);
     } catch (err) {
       console.error('Error fetching Web projects', err);
@@ -129,7 +129,7 @@ function WebPage() {
               <div key={project._id} className="web-project-card">
   {project.thumbnails && project.thumbnails.length > 0 && (
     <img
-      src={`https://project-drop-backend.onrender.com${project.thumbnails[0]}`}
+      src={`https://noble-transformation-production-ba33.up.railway.app/${project.thumbnails[0]}`}
       alt="Thumbnail"
       className="project-thumbnail"
     />
@@ -156,7 +156,7 @@ function WebPage() {
                 </div>
 
                 <a
-                  href={`https://project-drop-backend.onrender.com/${project.fileUrl}`}
+                  href={`https://noble-transformation-production-ba33.up.railway.app//${project.fileUrl}`}
                   download
                 >
                   Download Project
