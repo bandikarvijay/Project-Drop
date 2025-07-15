@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './Page.css'; // shared CSS styles
+import './Page.css';
 import { FiDownload } from 'react-icons/fi';
 import Modal from './Modal';
 
@@ -9,25 +9,22 @@ const WebPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const fetchProjects = async () => {
-    const res = await axios.get('https://project-drop-backend.onrender.com/api/projects?category=Web');
+    const res = await axios.get('/api/projects?category=Web');
     setProjects(res.data);
   };
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    const thumbnail = e.target.files[1] || null;
+    const files = e.target.files;
     const formData = new FormData();
     formData.append('category', 'Web');
-    formData.append('projectFile', file);
-    if (thumbnail) formData.append('thumbnail', thumbnail);
-
+    if (files[0]) formData.append('projectFile', files[0]);
+    if (files[1]) formData.append('thumbnail', files[1]);
     await axios.post('/api/projects', formData);
     fetchProjects();
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     const file = e.dataTransfer.files[0];
     const formData = new FormData();
     formData.append('category', 'Web');
@@ -42,9 +39,9 @@ const WebPage = () => {
   return (
     <div onDragOver={e => e.preventDefault()} onDrop={handleDrop}>
       <h2>Web Projects</h2>
-      <input type="file" onChange={handleFileUpload} />
+      <input type="file" onChange={handleFileUpload} multiple />
       <div className="project-grid">
-        {projects.map((p) => (
+        {projects.map(p => (
           <div key={p._id} className="project-card">
             <img src={p.thumbnailUrl} alt="thumb" onClick={() => setSelectedImage(p.thumbnailUrl)} />
             <div className="project-info">
