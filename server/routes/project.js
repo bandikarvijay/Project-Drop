@@ -41,7 +41,7 @@ router.post('/upload', protect, upload.fields([
       category,
       thumbnails: thumbnailPaths,
       fileUrl,
-      uploadedBy: req.user.id
+console.log('req.user:', req.user); // ← Add this before line 44
     });
 
     res.status(201).json(project);
