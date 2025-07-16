@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Modal from './components/Modal';
 import BackgroundVideo from './components/BackgroundVideo'; // Optional: if you're using a video background
 
 import Home from './pages/Home';
@@ -13,7 +14,6 @@ import Upload from './pages/Upload';
 import WebPage from './pages/WebPage';
 import DataPage from './pages/DataPage';
 import MobilePage from './pages/MobilePage';
-import MobilePage from './pages/Modal.js';
 
 function AppLayout() {
   const location = useLocation();
@@ -35,7 +35,6 @@ function AppLayout() {
           <Route path="/web" element={<WebPage />} />
           <Route path="/data" element={<DataPage />} />
           <Route path="/mobile" element={<MobilePage />} />
-          <Route path="/mobile" element={<Modal.js />} />
         </Routes>
       </div>
 
