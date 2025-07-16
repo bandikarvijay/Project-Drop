@@ -1,10 +1,5 @@
-.category-boxes::-webkit-scrollbar {
-  display: none;
-}
-
-.category-boxes {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+body {
+  overflow: hidden;
 }
 
 .typewriter-heading {
