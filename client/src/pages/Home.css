@@ -1,6 +1,14 @@
 body {
   overflow: hidden;
 }
+.category-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-top: 30px;
+  overflow: hidden; /* 👈 hides scroll section */
+}
 
 .typewriter-heading {
   font-size: 3.5rem;
