@@ -27,40 +27,34 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Upload project
-router.post(
-  '/upload',
-  protect,
-  upload.fields([
-    { name: 'thumbnail', maxCount: 10 },
-    { name: 'file', maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      const { title, category } = req.body;
-      const file = req.files?.file?.[0];
-      const thumbnails = req.files?.thumbnail || [];
+router.post('/upload', protect, upload.fields([
+  { name: 'thumbnail', maxCount: 10 },
+  { name: 'file', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { title, description, category } = req.body;
+    const file = req.files?.file?.[0];
+    const thumbnails = req.files?.thumbnail || [];
 
-      const thumbnailPaths = thumbnails.map(t => `/uploads/thumbnails/${t.filename}`);
-      const fileUrl = file ? `/uploads/files/${file.filename}` : '';
+    const thumbnailPaths = thumbnails.map(t => `/uploads/thumbnails/${t.filename}`);
+    const fileUrl = file ? `/uploads/files/${file.filename}` : '';
 
-      // Log user to debug
-      console.log('✅ Authenticated user:', req.user);
+    const project = await Project.create({
+      title,
+      description,
+      category,
+      thumbnails: thumbnailPaths,
+      fileUrl,
+      uploadedBy: req.user.id, // ✅ This is where it was crashing
+    });
 
-      const project = await Project.create({
-        title,
-        category,
-        thumbnails: thumbnailPaths,
-        fileUrl,
-        uploadedBy: req.user.id // ✅ Make sure protect middleware attaches this
-      });
-
-      res.status(201).json(project);
-    } catch (err) {
-      console.error('❌ Upload Error:', err);
-      res.status(500).json({ message: 'Upload failed' });
-    }
+    res.status(201).json(project);
+  } catch (err) {
+    console.error('Upload failed:', err);
+    res.status(500).json({ message: 'Upload failed' });
   }
-);
+});
+
 
 // Get all projects (with optional category filter)
 router.get('/', async (req, res) => {
