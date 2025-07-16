@@ -51,6 +51,48 @@
 .logout-button:hover {
   background-color: #c0392b;
 }
+.upload-container {
+  padding: 20px;
+}
+.upload-form input, .upload-form textarea, .upload-form button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+}
+.project-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+.project-card {
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #fff;
+}
+.project-card img {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+.project-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-image {
+  max-width: 90%;
+  max-height: 90%;
+}
 
 /* Main Container */
 .web-main-container {
