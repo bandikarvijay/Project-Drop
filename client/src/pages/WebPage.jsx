@@ -100,9 +100,15 @@ const WebPage = () => {
             <div className="project-info">
               <p>{p.uploadedBy?.name || 'Unknown'}</p>
               <p>{new Date(p.createdAt).toLocaleDateString()}</p>
-              <a href={`https://project-drop-backend.onrender.com${p.fileUrl}`} download>
-                <FiDownload size={20} />
-              </a>
+             <a
+  href={`https://project-drop-backend.onrender.com${p.fileUrl}`}
+  download
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <FiDownload size={22} />
+</a>
+
             </div>
           </div>
         ))}
