@@ -1,44 +1,32 @@
-const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Adjust path if needed
+const User = require('../models/User');
 
-const router = express.Router();
+const protect = async (req, res, next) => {
+  let token;
 
-// POST /api/auth/google-login
-router.post('/google-login', async (req, res) => {
-  const { name, email, googleId } = req.body;
+  // Check for Bearer token in headers
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
 
-  if (!name || !email || !googleId) {
-    return res.status(400).json({ message: 'Missing Google user data' });
-  }
+      // Decode token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  try {
-    // Check if user exists
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      // If not, create new user
-      user = await User.create({ name, email, googleId });
+      // Get user and attach to request
+      req.user = await User.findById(decoded.id).select('-password');
+      return next(); // ✅ go to next middleware
+    } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Not authorized' });
     }
-
-    // Create JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
-
-    // Send token and user details
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
-  } catch (error) {
-    console.error('Google Login Error:', error);
-    res.status(500).json({ message: 'Server error' });
   }
-});
 
-module.exports = router;
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+};
+
+module.exports = protect;
