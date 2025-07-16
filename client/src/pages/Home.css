@@ -9,6 +9,14 @@ body {
   padding-top: 30px;
   overflow: hidden; /* 👈 hides scroll section */
 }
+.category-boxes::-webkit-scrollbar {
+  display: none;
+}
+
+.category-boxes {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
 
 .typewriter-heading {
   font-size: 3.5rem;
