@@ -5,47 +5,41 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-// Load env variables
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
 
-// Initialize app
 const app = express();
 
-// Create upload folders if they don't exist
-['uploads', 'uploads/files', 'uploads/thumbnails'].forEach((dir) => {
-  const dirPath = path.join(__dirname, dir);
-  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
-});
-
-// CORS for Vercel frontend
-const allowedOrigins = ['https://project-drop-five.vercel.app'];
-
+// ✅ Add this before any routes
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: 'https://project-drop-five.vercel.app', // 🔁 Replace with your frontend Vercel domain
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// ✅ Add security headers to allow Google login/popups
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  next();
+});
 
 // Parse JSON
 app.use(express.json());
 
-// Serve uploaded files statically
+// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Ensure folders
+['uploads/files', 'uploads/thumbnails'].forEach(folder => {
+  const folderPath = path.join(__dirname, folder);
+  if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/project'));
 
-// Test route
 app.get('/', (req, res) => {
   res.send('✅ Project Drop API is running...');
 });
