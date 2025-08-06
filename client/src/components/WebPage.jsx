@@ -20,7 +20,7 @@ function WebPage() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/upload/web');
+      const res = await axios.get('https://project-drop.onrender.com/api/upload/web');
       setProjects(res.data || []);
     } catch (err) {
       console.error('fetchProjects err:', err);
@@ -50,7 +50,7 @@ function WebPage() {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/upload', formData, {
+      await axios.post('https://project-drop.onrender.com/api/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -74,7 +74,7 @@ function WebPage() {
     if (project.thumbnails && project.thumbnails.length > 0) {
       const url = project.thumbnails[i].startsWith('http')
         ? project.thumbnails[i]
-        : `http://localhost:5000${project.thumbnails[i]}`;
+        : `https://project-drop.onrender.com${project.thumbnails[i]}`;
       setPreviewImage(url);
     } else {
       setPreviewImage(null);
@@ -89,7 +89,7 @@ function WebPage() {
 
   const downloadUrl = async (url) => {
     try {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
       const token = localStorage.getItem('token');
       const res = await axios.get(fullUrl, {
         responseType: 'blob',
@@ -140,7 +140,7 @@ function WebPage() {
     }
 
     try {
-      const url = `http://localhost:5000/api/upload/${project._id}/download`;
+      const url = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
       const res = await axios.get(url, {
         responseType: 'blob',
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -232,7 +232,7 @@ function WebPage() {
                 <div className="tile-thumb" onClick={() => openPreview(p)}>
                   {p.thumbnails && p.thumbnails.length ? (
                     <img
-                      src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `http://localhost:5000${p.thumbnails[0]}`}
+                      src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `https://project-drop.onrender.com${p.thumbnails[0]}`}
                       alt="thumb"
                       className="tile-thumb-img"
                     />
@@ -272,7 +272,7 @@ function WebPage() {
 
               <div className="preview-thumbs">
                 {previewProject.thumbnails?.map((img, i) => {
-                  const src = img.startsWith('http') ? img : `http://localhost:5000${img}`;
+                  const src = img.startsWith('http') ? img : `https://project-drop.onrender.com${img}`;
                   const active = previewImage === src;
                   return (
                     <img
