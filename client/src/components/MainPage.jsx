@@ -53,7 +53,7 @@ function MainPage() {
   const profileSrc = () => {
     if (!user || !user.image) return '/profile.png';
     if (user.image.startsWith('http')) return user.image;
-    return `http://localhost:5000${user.image}`;
+    return `https://project-drop.onrender.com${user.image}`;
   };
 
   const items = [
