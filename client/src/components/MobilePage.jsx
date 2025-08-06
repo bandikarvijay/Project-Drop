@@ -22,7 +22,7 @@ function MobilePage() {
 
   async function fetchProjects() {
     try {
-      const res = await axios.get('http://localhost:5000/api/upload/mobile');
+      const res = await axios.get('https://project-drop.onrender.com/api/upload/mobile');
       setProjects(res.data || []);
     } catch (err) {
       console.error('fetchProjects err:', err);
@@ -52,7 +52,7 @@ function MobilePage() {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/upload', formData, {
+      await axios.post('https://project-drop.onrender.com/api/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -76,7 +76,7 @@ function MobilePage() {
     if (project.thumbnails && project.thumbnails.length > 0) {
       const url = project.thumbnails[index].startsWith('http')
         ? project.thumbnails[index]
-        : `http://localhost:5000${project.thumbnails[index]}`;
+        : `https://project-drop.onrender.com${project.thumbnails[index]}`;
       setPreviewImage(url);
     } else {
       setPreviewImage(null);
@@ -91,7 +91,7 @@ function MobilePage() {
 
   const downloadUrl = async (url) => {
     try {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
       const res = await fetch(fullUrl, { method: 'GET' });
       if (!res.ok) throw new Error('Network response was not ok');
       const blob = await res.blob();
@@ -110,7 +110,7 @@ function MobilePage() {
 
   const downloadAllFiles = async (project) => {
     const token = localStorage.getItem('token');
-    const zipUrl = `http://localhost:5000/api/upload/${project._id}/download`;
+    const zipUrl = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
 
     if (token) {
       try {
@@ -184,7 +184,7 @@ function MobilePage() {
             <div key={p._id} className="project-tile">
               <div className="tile-thumb" onClick={() => openPreview(p)}>
                 {p.thumbnails && p.thumbnails.length ? (
-                  <img src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `http://localhost:5000${p.thumbnails[0]}`} alt="thumb" className="tile-thumb-img" />
+                  <img src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `https://project-drop.onrender.com${p.thumbnails[0]}`} alt="thumb" className="tile-thumb-img" />
                 ) : <div className="tile-thumb-empty">No image</div>}
               </div>
               <div className="tile-info">
@@ -219,10 +219,10 @@ function MobilePage() {
                 {previewProject.thumbnails?.map((img, i) => (
                   <img
                     key={i}
-                    src={`http://localhost:5000${img}`}
+                    src={`https://project-drop.onrender.com${img}`}
                     alt={`thumb-${i}`}
-                    className={`preview-thumb ${previewImage === `http://localhost:5000${img}` ? 'active' : ''}`}
-                    onClick={() => setPreviewImage(`http://localhost:5000${img}`)}
+                    className={`preview-thumb ${previewImage === `https://project-drop.onrender.com${img}` ? 'active' : ''}`}
+                    onClick={() => setPreviewImage(`https://project-drop.onrender.com${img}`)}
                   />
                 ))}
               </div>
