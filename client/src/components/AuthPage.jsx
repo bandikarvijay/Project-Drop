@@ -30,7 +30,7 @@ function AuthPage() {
     e.preventDefault();
     try {
       if (isLogin) {
-        const res = await axios.post('http://localhost:5000/api/auth/login', {
+        const res = await axios.post('https://project-drop.onrender.com/api/auth/login', {
           email: formData.email,
           password: formData.password,
         });
@@ -44,7 +44,7 @@ function AuthPage() {
         data.append('password', formData.password);
         if (image) data.append('image', image);
 
-        const res = await axios.post('http://localhost:5000/api/auth/register', data, {
+        const res = await axios.post('https://project-drop.onrender.com/api/auth/register', data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         localStorage.setItem('token', res.data.token);
