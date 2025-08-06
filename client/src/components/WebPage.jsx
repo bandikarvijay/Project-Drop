@@ -119,7 +119,7 @@ function WebPage() {
     if (project.downloadZipUrl) {
       const zipUrl = project.downloadZipUrl.startsWith('http')
         ? project.downloadZipUrl
-        : `http://localhost:5000${project.downloadZipUrl}`;
+        : `https://project-drop.onrender.com${project.downloadZipUrl}`;
       try {
         const res = await axios.get(zipUrl, {
           responseType: 'blob',
