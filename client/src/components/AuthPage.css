@@ -1,0 +1,185 @@
+/* AuthPage.css */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  font-family: Arial, sans-serif;
+}
+
+.auth-container {
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  width: 350px;
+  text-align: center;
+}
+
+.auth-container h2 {
+  margin-bottom: 1rem;
+  font-size: 24px;
+  color: #ff6600;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-container input[type="text"],
+.auth-container input[type="email"],
+.auth-container input[type="password"],
+.auth-container input[type="file"] {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.auth-container button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #ff6600;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-container button:hover {
+  background: #e65500;
+}
+
+.toggle {
+  margin-top: 1rem;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  text-decoration: underline;
+  color: #ff6600;
+}
+/* AuthPage.css - Full-screen Orb background + centered small card */
+
+:root{
+  --accent: #ff6600;
+  --muted: #666;
+}
+
+/* Root wrapper ensures the Orb can cover the whole viewport */
+.authpage-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #0f1724 0%, #071126 100%); /* subtle underlying bg */
+}
+
+/* Orb full-screen container sits behind content */
+.orb-fullscreen {
+  position: fixed;
+  inset: 0;             /* top:0; right:0; bottom:0; left:0 */
+  z-index: 0;           /* behind page content */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* let clicks pass through (redundant with inline style) */
+}
+
+/* Content over the Orb. z-index above orb */
+.authpage-content {
+  position: relative;
+  z-index: 2; /* above orb */
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card */
+.auth-container {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.5);
+  text-align: center;
+  backdrop-filter: blur(6px) saturate(1.05);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Heading */
+.auth-container h2 {
+  margin: 0 0 12px;
+  color: #ff6600;
+  font-size: 1.4rem;
+  letter-spacing: 0.2px;
+}
+
+/* Form */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="file"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* file input show smaller */
+.auth-form input[type="file"] {
+  padding: 8px 10px;
+}
+
+/* Button */
+.auth-btn {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform .12s ease, opacity .12s ease;
+}
+
+.auth-btn:active { transform: translateY(1px); }
+.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Toggle text */
+.toggle {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Make form smaller on mobile */
+@media (max-width: 480px) {
+  .authpage-content { padding: 16px; max-width: 360px; }
+  .auth-container { padding: 16px; border-radius: 10px; }
+}

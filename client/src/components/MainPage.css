@@ -1,0 +1,182 @@
+/* === MAIN LAYOUT === */
+.main-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #a93e0b;
+  overflow: hidden;
+}
+
+/* Dark veil wrapper - covers whole page, behind content */
+.dark-veil-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none; /* allow clicking elements above */
+}
+
+/* Content wrapper to ensure footer pushes down */
+.main-content {
+  position: relative;
+  z-index: 1; /* above veil */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === NAVBAR === */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid black;
+  z-index: 2;
+}
+
+.logo, 
+.navbar .truefocus-text {
+  color: #a93e0b;
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+
+/* === PROFILE ICON & DROPDOWN === */
+.nav-icons {
+  display: flex;
+  align-items: center;
+}
+
+.profile-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.profile-wrapper {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 52px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  min-width: 140px;
+  padding: 8px;
+  z-index: 100;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 600;
+  color: #a93e0b;
+  cursor: pointer;
+}
+
+.dropdown-btn:hover {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* === BOXES SECTION === */
+.boxes {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 100px 0;
+  flex-wrap: wrap;
+}
+
+.box {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  padding: 20px;
+  transition: 0.3s;
+  text-align: center;
+  cursor: pointer;
+}
+
+.box:hover {
+  transform: scale(1.05);
+}
+
+.box img {
+  width: 100%;
+  height: 130px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.box p {
+  color: #a93e0b;
+  font-weight: 500;
+}
+
+/* === FOOTER === */
+/* Fixed footer (always visible) */
+.footer {
+  color: #a93e0b;
+  text-align: center;
+  padding: 10px;
+  z-index: 2;
+
+}
+
+/* If you want footer at bottom only when content is short (not fixed) */
+/*
+.footer {
+  margin-top: auto;
+  background: #222;
+  color: orange;
+  text-align: center;
+  padding: 10px;
+}
+*/
+
+/* === LINKS === */
+a, a:visited {
+  color: #a93e0b;
+}
+
+a:hover {
+  color: #a93e0b;
+}
+/* Dock wrapper smoothing — generic safe selectors */
+.dock-wrapper * {
+  transition: transform 160ms cubic-bezier(.22,.9,.35,1), box-shadow 160ms ease;
+  will-change: transform;
+}
+
+/* If Dock renders items with class `dock-item`, apply a gentle max scale */
+.dock-wrapper .dock-item,
+.dock-wrapper .dock-icon,
+.dock-wrapper img {
+  transform-origin: bottom center;
+}
+
+/* If Dock uses inline transforms for magnification, this rule reduces extreme jumps visually:
+   it doesn't break the Dock but will clamp the visual size on hover in many implementations */
+.dock-wrapper .dock-item:hover,
+.dock-wrapper .dock-item:focus,
+.dock-wrapper .dock-icon:hover {
+  transform: scale(1.18) !important; /* mild scale; adjust between 1.05 - 1.25 */
+}
+
+/* Ensure footer spacing looks good */
+.footer { background: transparent; padding: 12px 0; }

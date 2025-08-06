@@ -1,0 +1,112 @@
+/* Upload form - smaller card */
+.upload-form {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 12px auto;
+  max-width: 360px; /* smaller form width */
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-form input,
+.upload-form button {
+  padding: 5px 8px;
+  font-size: 0.85rem;
+  border-radius: 5px;
+}
+
+.upload-form label {
+  font-size: 0.75rem;
+  color: #ccc;
+}
+
+/* Center and color heading */
+.heading {
+  text-align: center;
+  color: #ff6600;
+}
+
+/* Project grid - compact layout */
+.project-grid,
+.project-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* compact layout */
+  gap: 8px;
+}
+
+/* Compact project tile */
+.project-tile {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.project-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px #ff6600;
+}
+
+/* Thumbnail small square */
+.tile-thumb {
+  width: 100%;
+  height: 80px; /* smaller height */
+  overflow: hidden;
+  border-radius: 5px;
+  background: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tile-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tile-thumb-empty {
+  font-size: 11px;
+  color: #888;
+}
+
+/* Compact info */
+.tile-info {
+  text-align: center;
+  width: 100%;
+}
+.tile-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tile-meta {
+  font-size: 0.65rem;
+  color: #777;
+}
+
+/* Small action button */
+.tile-actions {
+  margin-top: 2px;
+}
+.btn-download-small {
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+/* Hide scrollbar but keep scroll functionality */
+::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}

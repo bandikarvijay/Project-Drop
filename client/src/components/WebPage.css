@@ -1,0 +1,38 @@
+/* Project Tile */
+.project-tile {
+  background: transparent !important; /* no white card background */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.project-tile:hover {
+  transform: translateY(-3px);
+  border-color: #ffa04d;
+}
+
+/* Thumbnail area */
+.tile-thumb {
+  height: 150px;
+  background: transparent !important; /* remove default white bg */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* In case image is missing */
+.tile-thumb-empty {
+  background: transparent !important;
+  color: #ffa04d;
+  font-size: 14px;
+}
