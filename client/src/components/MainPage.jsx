@@ -75,7 +75,7 @@ const profileSrc = () => {
     {
       icon: <VscGlobe size={18} />,
       label: 'Profile',
-      onClick: () => window.open('https://www.linkedin.com/in/b-v-vijaya-bhaskar-2a50592b4/', '_blank', 'noopener'),
+      onClick: () => window.open('https://vijayabhaskar.vercel.app/', '_blank', 'noopener'),
     },
     {
       icon: <VscGithub size={18} />,
