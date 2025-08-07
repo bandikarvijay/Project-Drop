@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DataPage.css';
-import DarkVeil from './DarkVeil';
+import DarkVeil from '../DarkVeil/DarkVeil';
 
 const DataPage = () => {
   const [title, setTitle] = useState('');
