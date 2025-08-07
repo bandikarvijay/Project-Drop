@@ -218,7 +218,7 @@ function WebPage() {
           <div className="project-grid-compact">
             {projects.map((p) => (
               <div key={p._id} className="project-tile">
-                <div className="tile-thumb" onClick={() => openPreview(p)}>
+                <div className="project-tile" onClick={() => openPreview(p)}>
                   {p.thumbnails?.length ? (
                     <img
                       src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `${API_BASE}${p.thumbnails[0]}`}
