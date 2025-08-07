@@ -236,7 +236,7 @@ function WebPage() {
                 </div>
 
                 <div className="tile-actions">
-                  <button className="btn-download-small" onClick={() => downloadAllFiles(p)}>⤓ All</button>
+                  <button className="btn-download-small" onClick={() => downloadAllFiles(p)}>Dowload</button>
                 </div>
               </div>
             ))}
