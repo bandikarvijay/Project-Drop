@@ -1,175 +1,247 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/components/MobilePage.jsx
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './WebPage.css';
-import DarkVeil from '../backgrounds/DarkVeil';
+import './ProjectPages.css'; // shared CSS for mobile/data/web pages
+import DarkVeil from '../DarkVeil/DarkVeil'; // adjust path if necessary
 
 function MobilePage() {
   const [title, setTitle] = useState('');
-  const [thumbnails, setThumbnails] = useState([]);
   const [files, setFiles] = useState([]);
+  const [thumbnails, setThumbnails] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const fileInputRef = useRef();
-  const thumbnailInputRef = useRef();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get('https://project-drop.onrender.com/api/projects?category=Mobile');
-      setProjects(res.data);
-    } catch (err) {
-      console.error('Error fetching projects', err);
-    }
-  };
+  const [previewProject, setPreviewProject] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFileChange = (e) => {
-    setFiles(Array.from(e.target.files));
-  };
-
-  const handleThumbnailChange = (e) => {
-    setThumbnails(Array.from(e.target.files));
-  };
+  async function fetchProjects() {
+    try {
+      const res = await axios.get('https://project-drop.onrender.com/api/upload/mobile');
+      setProjects(res.data || []);
+    } catch (err) {
+      console.error('fetchProjects err:', err);
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+
     if (!title || thumbnails.length === 0 || files.length === 0) {
-      alert('Please fill all fields');
+      setErrorMsg('Please provide title, at least one thumbnail and at least one file.');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setErrorMsg('You must be logged in to upload.');
       return;
     }
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('category', 'Mobile');
-    thumbnails.forEach((thumb) => formData.append('thumbnail', thumb));
-    files.forEach((file) => formData.append('file', file));
+    formData.append('category', 'mobile');
+    thumbnails.forEach(t => formData.append('thumbnail', t));
+    files.forEach(f => formData.append('file', f));
 
+    setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       await axios.post('https://project-drop.onrender.com/api/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
         },
+        timeout: 120000
       });
       setTitle('');
-      setThumbnails([]);
       setFiles([]);
-      fileInputRef.current.value = '';
-      thumbnailInputRef.current.value = '';
+      setThumbnails([]);
       fetchProjects();
     } catch (err) {
-      console.error('Upload error', err);
-      alert('Upload failed');
+      console.error('upload error:', err);
+      setErrorMsg(err.response?.data?.message || err.message || 'Upload failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCardClick = (project) => {
-    setSelectedProject(project);
+  const openPreview = (project, index = 0) => {
+    setPreviewProject(project);
+    if (project.thumbnails && project.thumbnails.length > 0) {
+      const url = project.thumbnails[index].startsWith('http')
+        ? project.thumbnails[index]
+        : `https://project-drop.onrender.com${project.thumbnails[index]}`;
+      setPreviewImage(url);
+    } else {
+      setPreviewImage(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const closeModal = () => {
-    setSelectedProject(null);
+  const closePreview = () => {
+    setPreviewProject(null);
+    setPreviewImage(null);
   };
 
-  const isCodeFile = (fileName) => {
-    return /\.(js|jsx|ts|tsx|html|css|json|py|java|cpp|c|cs|php|rb)$/.test(fileName);
+  const downloadUrl = async (url) => {
+    try {
+      const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
+      const res = await fetch(fullUrl, { method: 'GET' });
+      if (!res.ok) throw new Error('Network response was not ok');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fullUrl.split('/').pop();
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      console.error('download failed', err);
+      alert('Download failed');
+    }
   };
 
-  const getFileExtension = (fileName) => {
-    return fileName.split('.').pop().toLowerCase();
+  const downloadAllFiles = async (project) => {
+    const token = localStorage.getItem('token');
+    const zipUrl = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
+
+    if (token) {
+      try {
+        const res = await fetch(zipUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch zip');
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${project.title.replace(/\s+/g, '_') || 'project'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        return;
+      } catch (err) {
+        console.warn('zip protected download failed, falling back to single downloads', err);
+      }
+    }
+
+    if (!project.files || project.files.length === 0) {
+      alert('No files to download.');
+      return;
+    }
+    for (const f of project.files) {
+      // eslint-disable-next-line no-await-in-loop
+      await downloadUrl(f);
+    }
   };
 
   return (
     <div className="page-container">
-      <DarkVeil />
-      <h2 className="heading">Upload Mobile Project</h2>
-      <form className="upload-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Project Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          ref={thumbnailInputRef}
-          onChange={handleThumbnailChange}
-        />
-        <input
-          type="file"
-          multiple
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
-        <button type="submit">Submit Project</button>
-      </form>
-
-      <h2 className="heading">All Uploaded Mobile Projects</h2>
-      <div className="project-list">
-        {projects.map((project) => (
-          <div className="project-card" key={project._id} onClick={() => handleCardClick(project)}>
-            {project.thumbnailUrls && project.thumbnailUrls.length > 0 ? (
-              <img src={project.thumbnailUrls[0]} alt="thumbnail" className="thumbnail" />
-            ) : (
-              <div className="thumbnail-placeholder">No Thumbnail</div>
-            )}
-            <div className="project-info">
-              <h3>{project.title}</h3>
-              <p>By {project.user?.name || 'Unknown'}</p>
-              <p>{new Date(project.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-        ))}
+      {/* FULL-PAGE DARK VEIL (behind content) */}
+      <div
+        className="dark-veil-wrap"
+        style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+        aria-hidden="true"
+      >
+        <DarkVeil />
       </div>
 
-      {selectedProject && (
-        <div className="modal" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close" onClick={closeModal}>&times;</span>
-            <h2>{selectedProject.title}</h2>
-            <p>By {selectedProject.user?.name || 'Unknown'}</p>
-            <p>{new Date(selectedProject.createdAt).toLocaleDateString()}</p>
+      {/* main-content sits above veil (z-index: 1 or higher) */}
+      <div className="main-content">
+        <h1 className="heading">Upload Mobile Project</h1>
 
-            <div className="modal-thumbnails">
-              {selectedProject.thumbnailUrls?.map((url, idx) => (
-                <img key={idx} src={url} alt="thumb" />
-              ))}
+        <form className="upload-form" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Project Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <label>Thumbnails (images)</label>
+          <input type="file" accept="image/*" multiple onChange={(e) => setThumbnails(Array.from(e.target.files))} />
+
+          <label>Mobile files / folder</label>
+          <input type="file" multiple webkitdirectory="true" directory="true" onChange={(e) => setFiles(Array.from(e.target.files))} />
+
+          {errorMsg && <div className="error">{errorMsg}</div>}
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Uploading...' : 'Upload'}
+          </button>
+        </form>
+
+        <h2 className="heading">All Uploaded Mobile Projects</h2>
+        <div className="project-grid">
+          {projects.map((p) => (
+            <div key={p._id} className="project-tile">
+              <div className="tile-thumb" onClick={() => openPreview(p)}>
+                {p.thumbnails && p.thumbnails.length ? (
+                  <img src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `https://project-drop.onrender.com${p.thumbnails[0]}`} alt="thumb" className="tile-thumb-img" />
+                ) : <div className="tile-thumb-empty">No image</div>}
+              </div>
+              <div className="tile-info">
+                <div className="tile-title">{p.title}</div>
+                <div className="tile-meta">{p.uploadedBy?.username || p.uploadedBy || 'Unknown'}</div>
+              </div>
+              <div className="tile-actions">
+                <button className="btn-download-small" onClick={() => downloadAllFiles(p)}>⤓ All</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Preview panel */}
+        {previewProject && (
+          <div className="preview-panel">
+            <div className="preview-header">
+              <div>
+                <strong>{previewProject.title}</strong>
+                <div className="preview-meta">{previewProject.uploadedBy?.username || previewProject.uploadedBy || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}</div>
+              </div>
+              <div className="preview-controls">
+                {previewImage && <button className="btn small" onClick={() => downloadUrl(previewImage)}>Download Image</button>}
+                <button className="btn small danger" onClick={closePreview}>✖ Close</button>
+              </div>
             </div>
 
-            <div className="modal-files">
-              {selectedProject.fileUrls?.map((url, idx) => {
-                const fileName = url.split('/').pop();
-                const ext = getFileExtension(fileName);
-                return (
-                  <div key={idx} className="file-preview">
-                    {isCodeFile(fileName) ? (
-                      <div className="code-preview">
-                        <iframe
-                          title={fileName}
-                          src={url}
-                          frameBorder="0"
-                          style={{ width: '100%', height: '200px' }}
-                        />
-                      </div>
-                    ) : (
-                      <p>{fileName}</p>
-                    )}
-                    <a href={url} download>
-                      <button>Download</button>
-                    </a>
-                  </div>
-                );
-              })}
+            <div className="preview-body">
+              {previewImage ? <img src={previewImage} alt="preview" className="preview-large" /> : <div className="no-preview">No image to preview</div>}
+
+              <div className="preview-thumbs">
+                {previewProject.thumbnails?.map((img, i) => (
+                  <img
+                    key={i}
+                    src={`https://project-drop.onrender.com${img}`}
+                    alt={`thumb-${i}`}
+                    className={`preview-thumb ${previewImage === `https://project-drop.onrender.com${img}` ? 'active' : ''}`}
+                    onClick={() => setPreviewImage(`https://project-drop.onrender.com${img}`)}
+                  />
+                ))}
+              </div>
+
+              <div className="file-list">
+                <h4>Files</h4>
+                <ul>
+                  {previewProject.files?.length ? previewProject.files.map((f, i) => (
+                    <li key={i}>
+                      <span className="file-name">{f.split('/').pop()}</span>
+                      <button className="btn tiny" onClick={() => downloadUrl(f)}>Download</button>
+                    </li>
+                  )) : <li>No files uploaded.</li>}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
