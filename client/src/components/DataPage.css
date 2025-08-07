@@ -1,0 +1,26 @@
+.data-page-container .upload-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  backdrop-filter: blur(6px);
+}
+
+.data-page-container .project-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.data-page-container .project-tile {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
