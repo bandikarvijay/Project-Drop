@@ -166,20 +166,53 @@ const profileSrc = () => {
 
 </div>
 
-        <div className="boxes" style={{ zIndex: 1 }}>
-          <div className="box" onClick={() => navigate('/web')}>
-            <img src="/web.png" alt="Web" />
-            <p>Web Projects</p>
-          </div>
-          <div className="box" onClick={() => navigate('/data')}>
-            <img src="/data.png" alt="Data" />
-            <p>Data Projects</p>
-          </div>
-          <div className="box" onClick={() => navigate('/mobile')}>
-            <img src="/mobile.png" alt="Mobile" />
-            <p>Mobile Projects</p>
-          </div>
-        </div>
+<div className="boxes" style={{ zIndex: 1 }}>
+  <div
+    className="box"
+    onClick={() => {
+      if (!user) {
+        localStorage.setItem('redirectTo', '/web');
+        navigate('/auth');
+      } else {
+        navigate('/web');
+      }
+    }}
+  >
+    <img src="/web.png" alt="Web" />
+    <p>Web Projects</p>
+  </div>
+
+  <div
+    className="box"
+    onClick={() => {
+      if (!user) {
+        localStorage.setItem('redirectTo', '/data');
+        navigate('/auth');
+      } else {
+        navigate('/data');
+      }
+    }}
+  >
+    <img src="/data.png" alt="Data" />
+    <p>Data Projects</p>
+  </div>
+
+  <div
+    className="box"
+    onClick={() => {
+      if (!user) {
+        localStorage.setItem('redirectTo', '/mobile');
+        navigate('/auth');
+      } else {
+        navigate('/mobile');
+      }
+    }}
+  >
+    <img src="/mobile.png" alt="Mobile" />
+    <p>Mobile Projects</p>
+  </div>
+</div>
+
       </div>
 
       <footer className="footer" style={{ position: 'relative', zIndex: 1 }}>
