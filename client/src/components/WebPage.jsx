@@ -4,6 +4,8 @@ import axios from 'axios';
 import DarkVeil from '../DarkVeil/DarkVeil';
 import './WebPage.css';
 
+const API_BASE = 'https://project-drop.onrender.com';
+
 function WebPage() {
   const [title, setTitle] = useState('');
   const [files, setFiles] = useState([]);
@@ -20,7 +22,7 @@ function WebPage() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get('https://project-drop.onrender.com/api/upload/web');
+      const res = await axios.get(`${API_BASE}/api/upload/web`);
       setProjects(res.data || []);
     } catch (err) {
       console.error('fetchProjects err:', err);
@@ -50,7 +52,7 @@ function WebPage() {
 
     setLoading(true);
     try {
-      await axios.post('https://project-drop.onrender.com/api/upload', formData, {
+      await axios.post(`${API_BASE}/api/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -71,14 +73,21 @@ function WebPage() {
 
   const openPreview = (project, i = 0) => {
     setPreviewProject(project);
-    if (project.thumbnails && project.thumbnails.length > 0) {
-      const url = project.thumbnails[i].startsWith('http')
-        ? project.thumbnails[i]
-        : `https://project-drop.onrender.com${project.thumbnails[i]}`;
+
+    if (
+      project.thumbnails &&
+      project.thumbnails.length > 0 &&
+      project.thumbnails[i]
+    ) {
+      const thumbPath = project.thumbnails[i];
+      const url = thumbPath.startsWith('http')
+        ? thumbPath
+        : `${API_BASE}${thumbPath}`;
       setPreviewImage(url);
     } else {
       setPreviewImage(null);
     }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -89,17 +98,22 @@ function WebPage() {
 
   const downloadUrl = async (url) => {
     try {
-      const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
+      const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
       const token = localStorage.getItem('token');
+
       const res = await axios.get(fullUrl, {
         responseType: 'blob',
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
+
       const blob = res.data;
       const disposition = res.headers['content-disposition'] || '';
       let filename = fullUrl.split('/').pop();
       const match = disposition.match(/filename="?([^"]+)"?/);
       if (match) filename = match[1];
+
+      if (!filename || filename === 'undefined') filename = 'downloaded-file';
+
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = filename;
@@ -119,7 +133,8 @@ function WebPage() {
     if (project.downloadZipUrl) {
       const zipUrl = project.downloadZipUrl.startsWith('http')
         ? project.downloadZipUrl
-        : `https://project-drop.onrender.com${project.downloadZipUrl}`;
+        : `${API_BASE}${project.downloadZipUrl}`;
+
       try {
         const res = await axios.get(zipUrl, {
           responseType: 'blob',
@@ -139,35 +154,9 @@ function WebPage() {
       }
     }
 
-    try {
-      const url = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
-      const res = await axios.get(url, {
-        responseType: 'blob',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      if (res.status === 200) {
-        const blob = res.data;
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${(project.title || 'project').replace(/\s+/g, '_')}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(a.href);
-        return;
-      }
-    } catch (err) {
-      console.warn('fallback to individual file download', err);
-    }
-
-    if (!project.files || project.files.length === 0) {
-      alert('No files to download');
-      return;
-    }
-
-    for (const f of project.files) {
-      // eslint-disable-next-line no-await-in-loop
-      await downloadUrl(f);
+    // fallback to downloading files one by one
+    for (const f of project.files || []) {
+      await downloadUrl(f); // Sequentially to avoid flooding
     }
   };
 
@@ -224,15 +213,15 @@ function WebPage() {
             <button type="submit" disabled={loading}>{loading ? 'Uploading...' : 'Upload'}</button>
           </form>
 
-        <h2 className="heading">All Uploaded Web Projects</h2>
+          <h2 className="heading">All Uploaded Web Projects</h2>
 
           <div className="project-grid-compact">
             {projects.map((p) => (
               <div key={p._id} className="project-tile">
                 <div className="tile-thumb" onClick={() => openPreview(p)}>
-                  {p.thumbnails && p.thumbnails.length ? (
+                  {p.thumbnails?.length ? (
                     <img
-                      src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `https://project-drop.onrender.com${p.thumbnails[0]}`}
+                      src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `${API_BASE}${p.thumbnails[0]}`}
                       alt="thumb"
                       className="tile-thumb-img"
                     />
@@ -262,17 +251,23 @@ function WebPage() {
                 <div className="preview-meta">{previewProject.uploadedBy?.username || previewProject.uploadedBy || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}</div>
               </div>
               <div className="preview-controls">
-                {previewImage && <button className="btn small" onClick={() => downloadUrl(previewImage)}>Download Image</button>}
+                {previewImage && (
+                  <button className="btn small" onClick={() => downloadUrl(previewImage)}>Download Image</button>
+                )}
                 <button className="btn small danger" onClick={closePreview}>✖ Close</button>
               </div>
             </div>
 
             <div className="preview-body">
-              {previewImage ? <img src={previewImage} alt="preview" className="preview-large" /> : <div className="no-preview">No image</div>}
+              {previewImage ? (
+                <img src={previewImage} alt="preview" className="preview-large" />
+              ) : (
+                <div className="no-preview">No image</div>
+              )}
 
               <div className="preview-thumbs">
                 {previewProject.thumbnails?.map((img, i) => {
-                  const src = img.startsWith('http') ? img : `https://project-drop.onrender.com${img}`;
+                  const src = img.startsWith('http') ? img : `${API_BASE}${img}`;
                   const active = previewImage === src;
                   return (
                     <img
@@ -289,12 +284,15 @@ function WebPage() {
               <div className="file-list">
                 <h4>Files</h4>
                 <ul>
-                  {previewProject.files?.length ? previewProject.files.map((f, i) => (
-                    <li key={i}>
-                      <span className="file-name">{f.split('/').pop()}</span>
-                      <button className="btn tiny" onClick={() => downloadUrl(f)}>Download</button>
-                    </li>
-                  )) : <li>No files uploaded.</li>}
+                  {previewProject.files?.length ? previewProject.files.map((f, i) => {
+                    const fileUrl = f.startsWith('http') ? f : `${API_BASE}${f}`;
+                    return (
+                      <li key={i}>
+                        <span className="file-name">{f.split('/').pop()}</span>
+                        <button className="btn tiny" onClick={() => downloadUrl(fileUrl)}>Download</button>
+                      </li>
+                    );
+                  }) : <li>No files uploaded.</li>}
                 </ul>
               </div>
             </div>
@@ -306,3 +304,4 @@ function WebPage() {
 }
 
 export default WebPage;
+
