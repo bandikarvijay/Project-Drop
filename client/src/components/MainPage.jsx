@@ -50,11 +50,16 @@ function MainPage() {
     setOpen(false);
   };
 
-  const profileSrc = () => {
-    if (!user || !user.image) return '/profile.png';
-    if (user.image.startsWith('http')) return user.image;
-    return `https://project-drop.onrender.com${user.image}`;
-  };
+const profileSrc = () => {
+  if (!user || !user.image) return '/profile.png';
+
+  const isExternal = user.image.startsWith('http') || user.image.startsWith('https');
+  if (isExternal) return user.image;
+
+  // Safe fallback for relative image path
+  return `https://project-drop.onrender.com${user.image.startsWith('/') ? '' : '/'}${user.image}`;
+};
+
 
   const items = [
     {
