@@ -1,8 +1,7 @@
-// src/components/MobilePage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './ProjectPages.css'; // shared CSS for mobile/data/web pages
-import DarkVeil from '../DarkVeil/DarkVeil'; // adjust path if necessary
+import './ProjectPages.css';
+import DarkVeil from '../DarkVeil/DarkVeil';
 
 function MobilePage() {
   const [title, setTitle] = useState('');
@@ -15,18 +14,13 @@ function MobilePage() {
   const [previewProject, setPreviewProject] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
-  useEffect(() => {
-    fetchProjects();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { fetchProjects(); }, []);
 
   async function fetchProjects() {
     try {
       const res = await axios.get('https://project-drop.onrender.com/api/upload/mobile');
       setProjects(res.data || []);
-    } catch (err) {
-      console.error('fetchProjects err:', err);
-    }
+    } catch (err) { console.error('fetchProjects err:', err); }
   }
 
   const handleSubmit = async (e) => {
@@ -39,10 +33,7 @@ function MobilePage() {
     }
 
     const token = localStorage.getItem('token');
-    if (!token) {
-      setErrorMsg('You must be logged in to upload.');
-      return;
-    }
+    if (!token) { setErrorMsg('You must be logged in to upload.'); return; }
 
     const formData = new FormData();
     formData.append('title', title);
@@ -53,129 +44,76 @@ function MobilePage() {
     setLoading(true);
     try {
       await axios.post('https://project-drop.onrender.com/api/upload', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
         timeout: 120000
       });
-      setTitle('');
-      setFiles([]);
-      setThumbnails([]);
-      fetchProjects();
+      setTitle(''); setFiles([]); setThumbnails([]); fetchProjects();
     } catch (err) {
       console.error('upload error:', err);
       setErrorMsg(err.response?.data?.message || err.message || 'Upload failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const openPreview = (project, index = 0) => {
     setPreviewProject(project);
-    if (project.thumbnails && project.thumbnails.length > 0) {
+    if (project.thumbnails?.length > 0) {
       const url = project.thumbnails[index].startsWith('http')
         ? project.thumbnails[index]
         : `https://project-drop.onrender.com${project.thumbnails[index]}`;
       setPreviewImage(url);
-    } else {
-      setPreviewImage(null);
-    }
+    } else { setPreviewImage(null); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const closePreview = () => {
-    setPreviewProject(null);
-    setPreviewImage(null);
-  };
+  const closePreview = () => { setPreviewProject(null); setPreviewImage(null); };
 
   const downloadUrl = async (url) => {
     try {
       const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
-      const res = await fetch(fullUrl, { method: 'GET' });
-      if (!res.ok) throw new Error('Network response was not ok');
+      const res = await fetch(fullUrl);
+      if (!res.ok) throw new Error('Network error');
       const blob = await res.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = fullUrl.split('/').pop();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(a.href);
-    } catch (err) {
-      console.error('download failed', err);
-      alert('Download failed');
-    }
+    } catch (err) { alert('Download failed'); }
   };
 
   const downloadAllFiles = async (project) => {
     const token = localStorage.getItem('token');
     const zipUrl = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
-
     if (token) {
       try {
-        const res = await fetch(zipUrl, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await fetch(zipUrl, { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) throw new Error('Failed to fetch zip');
         const blob = await res.blob();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = `${project.title.replace(/\s+/g, '_') || 'project'}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(a.href);
         return;
-      } catch (err) {
-        console.warn('zip protected download failed, falling back to single downloads', err);
-      }
+      } catch (err) { console.warn('zip failed, fallback to single'); }
     }
-
-    if (!project.files || project.files.length === 0) {
-      alert('No files to download.');
-      return;
-    }
-    for (const f of project.files) {
-      // eslint-disable-next-line no-await-in-loop
-      await downloadUrl(f);
-    }
+    if (!project.files?.length) { alert('No files to download.'); return; }
+    for (const f of project.files) { await downloadUrl(f); }
   };
 
   return (
     <div className="page-container">
-      {/* FULL-PAGE DARK VEIL (behind content) */}
-      <div
-        className="dark-veil-wrap"
-        style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
-        aria-hidden="true"
-      >
-        <DarkVeil />
-      </div>
-
-      {/* main-content sits above veil (z-index: 1 or higher) */}
+      <div className="dark-veil-wrap"><DarkVeil /></div>
       <div className="main-content">
         <h1 className="heading">Upload Mobile Project</h1>
-
         <form className="upload-form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Project Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
+          <input type="text" placeholder="Project Title" value={title} onChange={(e) => setTitle(e.target.value)} />
           <label>Thumbnails (images)</label>
           <input type="file" accept="image/*" multiple onChange={(e) => setThumbnails(Array.from(e.target.files))} />
-
           <label>Mobile files / folder</label>
           <input type="file" multiple webkitdirectory="true" directory="true" onChange={(e) => setFiles(Array.from(e.target.files))} />
-
           {errorMsg && <div className="error">{errorMsg}</div>}
-
-          <button type="submit" disabled={loading}>
-            {loading ? 'Uploading...' : 'Upload'}
-          </button>
+          <button type="submit" disabled={loading}>{loading ? 'Uploading...' : 'Upload'}</button>
         </form>
 
         <h2 className="heading">All Uploaded Mobile Projects</h2>
@@ -183,7 +121,7 @@ function MobilePage() {
           {projects.map((p) => (
             <div key={p._id} className="project-tile">
               <div className="tile-thumb" onClick={() => openPreview(p)}>
-                {p.thumbnails && p.thumbnails.length ? (
+                {p.thumbnails?.length ? (
                   <img src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `https://project-drop.onrender.com${p.thumbnails[0]}`} alt="thumb" className="tile-thumb-img" />
                 ) : <div className="tile-thumb-empty">No image</div>}
               </div>
@@ -198,45 +136,36 @@ function MobilePage() {
           ))}
         </div>
 
-        {/* Preview panel */}
         {previewProject && (
           <div className="preview-panel">
             <div className="preview-header">
               <div>
                 <strong>{previewProject.title}</strong>
-                <div className="preview-meta">{previewProject.uploadedBy?.username || previewProject.uploadedBy || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}</div>
+                <div className="preview-meta">{previewProject.uploadedBy?.username || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}</div>
               </div>
               <div className="preview-controls">
                 {previewImage && <button className="btn small" onClick={() => downloadUrl(previewImage)}>Download Image</button>}
                 <button className="btn small danger" onClick={closePreview}>✖ Close</button>
               </div>
             </div>
-
             <div className="preview-body">
-              {previewImage ? <img src={previewImage} alt="preview" className="preview-large" /> : <div className="no-preview">No image to preview</div>}
-
+              {previewImage ? <img src={previewImage} alt="preview" className="preview-large" /> : <div className="no-preview">No image</div>}
               <div className="preview-thumbs">
                 {previewProject.thumbnails?.map((img, i) => (
-                  <img
-                    key={i}
-                    src={`https://project-drop.onrender.com${img}`}
-                    alt={`thumb-${i}`}
-                    className={`preview-thumb ${previewImage === `https://project-drop.onrender.com${img}` ? 'active' : ''}`}
-                    onClick={() => setPreviewImage(`https://project-drop.onrender.com${img}`)}
-                  />
+                  <img key={i} src={`https://project-drop.onrender.com${img}`} alt={`thumb-${i}`} className={`preview-thumb ${previewImage === `https://project-drop.onrender.com${img}` ? 'active' : ''}`} onClick={() => setPreviewImage(`https://project-drop.onrender.com${img}`)} />
                 ))}
               </div>
-
               <div className="file-list">
                 <h4>Files</h4>
                 <ul>
                   {previewProject.files?.length ? previewProject.files.map((f, i) => (
-                    <li key={i}>
-                      <span className="file-name">{f.split('/').pop()}</span>
-                      <button className="btn tiny" onClick={() => downloadUrl(f)}>Download</button>
-                    </li>
+                    <li key={i}><span className="file-name">{f.split('/').pop()}</span>
+                      <button className="btn tiny" onClick={() => downloadUrl(f)}>Download</button></li>
                   )) : <li>No files uploaded.</li>}
                 </ul>
+              </div>
+              <div className="zip-download">
+                <button className="btn" onClick={() => downloadAllFiles(previewProject)}>⤓ Download All (ZIP)</button>
               </div>
             </div>
           </div>
