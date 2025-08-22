@@ -1,20 +1,18 @@
 // src/components/WebPage.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import DarkVeil from '../DarkVeil/DarkVeil';
-import './WebPage.css';
-
-const API_BASE = 'https://project-drop.onrender.com';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import DarkVeil from "../DarkVeil/DarkVeil";
+import "./WebPage.css";
 
 function WebPage() {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState("");
   const [files, setFiles] = useState([]);
   const [thumbnails, setThumbnails] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [previewProject, setPreviewProject] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     fetchProjects();
@@ -22,50 +20,52 @@ function WebPage() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/api/upload/web`);
+      const res = await axios.get("https://project-drop.onrender.com/api/upload/web");
       setProjects(res.data || []);
     } catch (err) {
-      console.error('fetchProjects err:', err);
+      console.error("fetchProjects err:", err);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
+    setErrorMsg("");
 
     if (!title || thumbnails.length === 0 || files.length === 0) {
-      setErrorMsg('Please provide title, thumbnails and files.');
+      setErrorMsg("Please provide title, thumbnails and files.");
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      setErrorMsg('You must be logged in to upload.');
+      setErrorMsg("You must be logged in to upload.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('category', 'web');
-    thumbnails.forEach(t => formData.append('thumbnail', t));
-    files.forEach(f => formData.append('file', f));
+    formData.append("title", title);
+    formData.append("category", "web");
+    thumbnails.forEach((t) => formData.append("thumbnail", t));
+    files.forEach((f) => formData.append("file", f));
 
     setLoading(true);
     try {
-      await axios.post(`${API_BASE}/api/upload`, formData, {
+      await axios.post("https://project-drop.onrender.com/api/upload", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          "Content-Type": "multipart/form-data",
         },
-        timeout: 120000
+        timeout: 120000,
       });
-      setTitle('');
+      setTitle("");
       setFiles([]);
       setThumbnails([]);
       fetchProjects();
     } catch (err) {
-      console.error('upload error:', err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Upload failed');
+      console.error("upload error:", err);
+      setErrorMsg(
+        err.response?.data?.message || err.message || "Upload failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -73,22 +73,15 @@ function WebPage() {
 
   const openPreview = (project, i = 0) => {
     setPreviewProject(project);
-
-    if (
-      project.thumbnails &&
-      project.thumbnails.length > 0 &&
-      project.thumbnails[i]
-    ) {
-      const thumbPath = project.thumbnails[i];
-      const url = thumbPath.startsWith('http')
-        ? thumbPath
-        : `${API_BASE}${thumbPath}`;
+    if (project.thumbnails && project.thumbnails.length > 0) {
+      const url = project.thumbnails[i].startsWith("http")
+        ? project.thumbnails[i]
+        : `https://project-drop.onrender.com${project.thumbnails[i]}`;
       setPreviewImage(url);
     } else {
       setPreviewImage(null);
     }
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const closePreview = () => {
@@ -98,23 +91,20 @@ function WebPage() {
 
   const downloadUrl = async (url) => {
     try {
-      const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
-      const token = localStorage.getItem('token');
-
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `https://project-drop.onrender.com${url}`;
+      const token = localStorage.getItem("token");
       const res = await axios.get(fullUrl, {
-        responseType: 'blob',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+        responseType: "blob",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-
       const blob = res.data;
-      const disposition = res.headers['content-disposition'] || '';
-      let filename = fullUrl.split('/').pop();
+      const disposition = res.headers["content-disposition"] || "";
+      let filename = fullUrl.split("/").pop();
       const match = disposition.match(/filename="?([^"]+)"?/);
       if (match) filename = match[1];
-
-      if (!filename || filename === 'undefined') filename = 'downloaded-file';
-
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = filename;
       document.body.appendChild(a);
@@ -122,41 +112,66 @@ function WebPage() {
       a.remove();
       URL.revokeObjectURL(a.href);
     } catch (err) {
-      console.error('downloadUrl err', err);
-      alert('Download failed');
+      console.error("downloadUrl err", err);
+      alert("Download failed");
     }
   };
 
   const downloadAllFiles = async (project) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
 
     if (project.downloadZipUrl) {
-      const zipUrl = project.downloadZipUrl.startsWith('http')
+      const zipUrl = project.downloadZipUrl.startsWith("http")
         ? project.downloadZipUrl
-        : `${API_BASE}${project.downloadZipUrl}`;
-
+        : `https://project-drop.onrender.com${project.downloadZipUrl}`;
       try {
         const res = await axios.get(zipUrl, {
-          responseType: 'blob',
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
+          responseType: "blob",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const blob = res.data;
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `${(project.title || 'project').replace(/\s+/g, '_')}.zip`;
+        a.download = `${(project.title || "project").replace(/\s+/g, "_")}.zip`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(a.href);
         return;
       } catch (err) {
-        console.warn('zip download failed', err);
+        console.warn("zip download failed", err);
       }
     }
 
-    // fallback to downloading files one by one
-    for (const f of project.files || []) {
-      await downloadUrl(f); // Sequentially to avoid flooding
+    try {
+      const url = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
+      const res = await axios.get(url, {
+        responseType: "blob",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.status === 200) {
+        const blob = res.data;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${(project.title || "project").replace(/\s+/g, "_")}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        return;
+      }
+    } catch (err) {
+      console.warn("fallback to individual file download", err);
+    }
+
+    if (!project.files || project.files.length === 0) {
+      alert("No files to download");
+      return;
+    }
+
+    for (const f of project.files) {
+      // eslint-disable-next-line no-await-in-loop
+      await downloadUrl(f);
     }
   };
 
@@ -164,7 +179,12 @@ function WebPage() {
     <div className="webpage-root">
       <div
         className="dark-veil-wrap"
-        style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
         aria-hidden="true"
       >
         <DarkVeil />
@@ -190,7 +210,9 @@ function WebPage() {
             />
             <div className="selected-list">
               {thumbnails.map((t, i) => (
-                <div key={i} className="selected-item">{t.name}</div>
+                <div key={i} className="selected-item">
+                  {t.name}
+                </div>
               ))}
             </div>
 
@@ -204,24 +226,42 @@ function WebPage() {
             />
             <div className="selected-list">
               {files.slice(0, 6).map((f, i) => (
-                <div key={i} className="selected-item">{f.webkitRelativePath || f.name}</div>
+                <div key={i} className="selected-item">
+                  {f.webkitRelativePath || f.name}
+                </div>
               ))}
-              {files.length > 6 && <div className="selected-item">+{files.length - 6} more</div>}
+              {files.length > 6 && (
+                <div className="selected-item">+{files.length - 6} more</div>
+              )}
             </div>
 
-            {errorMsg && <div className="error" style={{ color: 'red' }}>{errorMsg}</div>}
-            <button type="submit" disabled={loading}>{loading ? 'Uploading...' : 'Upload'}</button>
+            {errorMsg && (
+              <div className="error" style={{ color: "red" }}>
+                {errorMsg}
+              </div>
+            )}
+            <button type="submit" disabled={loading}>
+              {loading ? "Uploading..." : "Upload"}
+            </button>
           </form>
 
           <h2 className="heading">All Uploaded Web Projects</h2>
 
           <div className="project-grid-compact">
             {projects.map((p) => (
-              <div key={p._id} className="project-tile">
-                <div className="project-tile" onClick={() => openPreview(p)}>
-                  {p.thumbnails?.length ? (
+              <div
+                key={p._id}
+                className="project-tile"
+                onClick={() => openPreview(p)}
+              >
+                <div className="tile-thumb">
+                  {p.thumbnails && p.thumbnails.length ? (
                     <img
-                      src={p.thumbnails[0].startsWith('http') ? p.thumbnails[0] : `${API_BASE}${p.thumbnails[0]}`}
+                      src={
+                        p.thumbnails[0].startsWith("http")
+                          ? p.thumbnails[0]
+                          : `https://project-drop.onrender.com${p.thumbnails[0]}`
+                      }
                       alt="thumb"
                       className="tile-thumb-img"
                     />
@@ -232,11 +272,9 @@ function WebPage() {
 
                 <div className="tile-info">
                   <div className="tile-title">{p.title}</div>
-                  <div className="tile-meta">{p.uploadedBy?.username || p.uploadedBy || 'Unknown'}</div>
-                </div>
-
-                <div className="tile-actions">
-                  <button className="btn-download-small" onClick={() => downloadAllFiles(p)}>Dowload</button>
+                  <div className="tile-meta">
+                    {p.uploadedBy?.username || p.uploadedBy || "Unknown"}
+                  </div>
                 </div>
               </div>
             ))}
@@ -244,37 +282,46 @@ function WebPage() {
         </div>
 
         {previewProject && (
-          <div className="preview-panel" role="dialog" aria-modal="true">
-            <div className="preview-header">
-              <div>
-                <strong>{previewProject.title}</strong>
-                <div className="preview-meta">{previewProject.uploadedBy?.username || previewProject.uploadedBy || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}</div>
+          <div className="preview-overlay" role="dialog" aria-modal="true">
+            <div className="preview-card">
+              <div className="preview-header">
+                <div>
+                  <strong>{previewProject.title}</strong>
+                  <div className="preview-meta">
+                    {previewProject.uploadedBy?.username ||
+                      previewProject.uploadedBy ||
+                      "Unknown"}{" "}
+                    • {new Date(previewProject.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <button
+                  className="btn small danger"
+                  onClick={closePreview}
+                >
+                  ✖
+                </button>
               </div>
-              <div className="preview-controls">
-                {previewImage && (
-                  <button className="btn small" onClick={() => downloadUrl(previewImage)}>Download Image</button>
-                )}
-                <button className="btn small danger" onClick={closePreview}>✖ Close</button>
-              </div>
-            </div>
 
-            <div className="preview-body">
-              {previewImage ? (
-                <img src={previewImage} alt="preview" className="preview-large" />
-              ) : (
-                <div className="no-preview">No image</div>
-              )}
+              <div className="preview-image">
+                {previewImage ? (
+                  <img src={previewImage} alt="preview" />
+                ) : (
+                  <div className="no-preview">No image</div>
+                )}
+              </div>
 
               <div className="preview-thumbs">
                 {previewProject.thumbnails?.map((img, i) => {
-                  const src = img.startsWith('http') ? img : `${API_BASE}${img}`;
+                  const src = img.startsWith("http")
+                    ? img
+                    : `https://project-drop.onrender.com${img}`;
                   const active = previewImage === src;
                   return (
                     <img
                       key={i}
                       src={src}
                       alt={`thumb-${i}`}
-                      className={`preview-thumb ${active ? 'active' : ''}`}
+                      className={`preview-thumb ${active ? "active" : ""}`}
                       onClick={() => setPreviewImage(src)}
                     />
                   );
@@ -284,16 +331,31 @@ function WebPage() {
               <div className="file-list">
                 <h4>Files</h4>
                 <ul>
-                  {previewProject.files?.length ? previewProject.files.map((f, i) => {
-                    const fileUrl = f.startsWith('http') ? f : `${API_BASE}${f}`;
-                    return (
+                  {previewProject.files?.length ? (
+                    previewProject.files.map((f, i) => (
                       <li key={i}>
-                        <span className="file-name">{f.split('/').pop()}</span>
-                        <button className="btn tiny" onClick={() => downloadUrl(fileUrl)}>Download</button>
+                        <span className="file-name">{f.split("/").pop()}</span>
+                        <button
+                          className="btn tiny"
+                          onClick={() => downloadUrl(f)}
+                        >
+                          ⤓ Download
+                        </button>
                       </li>
-                    );
-                  }) : <li>No files uploaded.</li>}
+                    ))
+                  ) : (
+                    <li>No files uploaded.</li>
+                  )}
                 </ul>
+              </div>
+
+              <div className="preview-actions">
+                <button
+                  className="btn zip"
+                  onClick={() => downloadAllFiles(previewProject)}
+                >
+                  ⤓ Download ZIP
+                </button>
               </div>
             </div>
           </div>
@@ -304,4 +366,3 @@ function WebPage() {
 }
 
 export default WebPage;
-
