@@ -1,154 +1,265 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DarkVeil from '../DarkVeil/DarkVeil'; // Adjust path as needed
 import './ProjectPages.css';
-import DarkVeil from '../DarkVeil/DarkVeil';
 
-const DataPage = () => {
+function DataPage() {
   const [title, setTitle] = useState('');
-  const [thumbnails, setThumbnails] = useState([]);
   const [files, setFiles] = useState([]);
+  const [thumbnails, setThumbnails] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [previewFile, setPreviewFile] = useState(null);
-  const [codeContent, setCodeContent] = useState('');
-
-  const API_URL = 'https://project-drop.onrender.com';
-
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/api/upload`);
-      const dataProjects = res.data.filter(p => p.category === 'Data');
-      setProjects(dataProjects.reverse());
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-    }
-  };
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [previewProject, setPreviewProject] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     fetchProjects();
   }, []);
 
+  async function fetchProjects() {
+    try {
+      const res = await axios.get('https://project-drop.onrender.com/api/upload/data');
+      setProjects(res.data || []);
+    } catch (err) {
+      console.error('fetchProjects err:', err);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+
+    if (!title || thumbnails.length === 0 || files.length === 0) {
+      setErrorMsg('Please provide title, at least one thumbnail and at least one file.');
+      return;
+    }
+
     const token = localStorage.getItem('token');
-    if (!token) return alert('Please log in to upload projects.');
+    if (!token) {
+      setErrorMsg('You must be logged in to upload.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('category', 'Data');
-    thumbnails.forEach(img => formData.append('thumbnail', img));
-    files.forEach(file => formData.append('file', file));
+    formData.append('category', 'data');
+    thumbnails.forEach(t => formData.append('thumbnail', t));
+    files.forEach(f => formData.append('file', f));
 
+    setLoading(true);
     try {
-      await axios.post(`${API_URL}/api/upload`, formData, {
+      await axios.post('https://project-drop.onrender.com/api/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
         },
+        timeout: 120000
       });
       setTitle('');
-      setThumbnails([]);
       setFiles([]);
+      setThumbnails([]);
       fetchProjects();
     } catch (err) {
-      console.error('Upload failed:', err);
+      console.error('upload error:', err);
+      setErrorMsg(err.response?.data?.message || err.message || 'Upload failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePreview = async (fileUrl, fileName) => {
-    const ext = fileName.split('.').pop().toLowerCase();
-    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
-      setPreviewFile({ type: 'image', src: fileUrl });
-    } else if (['txt', 'js', 'html', 'css', 'py', 'java', 'cpp', 'json', 'md'].includes(ext)) {
-      try {
-        const res = await axios.get(fileUrl);
-        setPreviewFile({ type: 'code', name: fileName });
-        setCodeContent(res.data);
-      } catch (err) {
-        alert('Failed to load code');
-      }
+  const openPreview = (project, index = 0) => {
+    setPreviewProject(project);
+    if (project.thumbnails && project.thumbnails.length > 0) {
+      const url = project.thumbnails[index].startsWith('http')
+        ? project.thumbnails[index]
+        : `https://project-drop.onrender.com${project.thumbnails[index]}`;
+      setPreviewImage(url);
     } else {
-      setPreviewFile(null);
-      window.open(fileUrl, '_blank');
+      setPreviewImage(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closePreview = () => {
+    setPreviewProject(null);
+    setPreviewImage(null);
+  };
+
+  const downloadUrl = async (url) => {
+    try {
+      const fullUrl = url.startsWith('http') ? url : `https://project-drop.onrender.com${url}`;
+      const res = await fetch(fullUrl, { method: 'GET' });
+      if (!res.ok) throw new Error('Network response was not ok');
+      const blob = await res.blob();
+      const disp = res.headers.get('content-disposition');
+      let filename = fullUrl.split('/').pop();
+      if (disp) {
+        const m = disp.match(/filename="?(.+)"?/);
+        if (m) filename = m[1];
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      console.error('download failed', err);
+      alert('Download failed');
     }
   };
 
-  const copyCode = () => {
-    navigator.clipboard.writeText(codeContent);
-    alert('Code copied!');
+  const downloadAllFiles = async (project) => {
+    const token = localStorage.getItem('token');
+    const zipUrl = `https://project-drop.onrender.com/api/upload/${project._id}/download`;
+
+    if (token) {
+      try {
+        const res = await fetch(zipUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch zip');
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${project.title.replace(/\s+/g, '_') || 'project'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        return;
+      } catch (err) {
+        console.warn('zip protected download failed, falling back to single downloads', err);
+      }
+    }
+
+    if (!project.files || project.files.length === 0) {
+      alert('No files to download.');
+      return;
+    }
+    for (const f of project.files) {
+      await downloadUrl(f);
+    }
   };
 
   return (
-    <div className="page-container">
-      <DarkVeil />
-      <h2 className="heading">Upload Data Project</h2>
-      <form className="upload-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Enter project title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={(e) => setThumbnails(Array.from(e.target.files))}
-        />
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files))}
-        />
-        <button type="submit">Upload Project</button>
-      </form>
-
-      <h2 className="heading">All Uploaded Data Projects</h2>
-      <div className="project-grid">
-        {projects.map((project) => (
-          <div className="project-card" key={project._id}>
-            {project.thumbnailUrls.length > 0 && (
-              <img
-                src={project.thumbnailUrls[0]}
-                alt="thumbnail"
-                className="thumbnail"
-              />
-            )}
-            <h3>{project.title}</h3>
-            <p><strong>Uploaded by:</strong> {project.uploader?.name}</p>
-            <p><strong>Date:</strong> {new Date(project.createdAt).toLocaleDateString()}</p>
-            <div className="file-list">
-              {project.fileUrls.map((url, idx) => {
-                const fileName = url.split('/').pop();
-                return (
-                  <div key={idx} className="file-item">
-                    <button onClick={() => handlePreview(url, fileName)}>👁️</button>
-                    <a href={url} download target="_blank" rel="noreferrer">⬇️</a>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+    <div className="data-page-root">
+      {/* Background effect */}
+      <div
+        className="dark-veil-wrap"
+        style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+        aria-hidden="true"
+      >
+        <DarkVeil />
       </div>
 
-      {previewFile && (
-        <div className="modal" onClick={() => setPreviewFile(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            {previewFile.type === 'image' && (
-              <img src={previewFile.src} alt="Preview" className="preview-image" />
-            )}
-            {previewFile.type === 'code' && (
-              <>
-                <pre>{codeContent}</pre>
-                <button onClick={copyCode}>Copy Code</button>
-              </>
-            )}
-          </div>
+      {/* Foreground content */}
+      <div className="main-content">
+        <h1 className="heading">Upload Data Project</h1>
+
+        <form className="upload-form" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Project Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <label>Thumbnails (images)</label>
+          <input type="file" accept="image/*" multiple onChange={(e) => setThumbnails(Array.from(e.target.files))} />
+          {thumbnails.length > 0 && (
+            <div className="selected-list">
+              {thumbnails.map((t, i) => <div key={i} className="selected-item">{t.name}</div>)}
+            </div>
+          )}
+
+          <label>Data files / folder</label>
+          <input type="file" multiple webkitdirectory="true" directory="true" onChange={(e) => setFiles(Array.from(e.target.files))} />
+          {files.length > 0 && (
+            <div className="selected-list">
+              {files.slice(0, 6).map((f, i) => <div key={i} className="selected-item">{f.webkitRelativePath || f.name}</div>)}
+              {files.length > 6 && <div className="selected-item">+{files.length - 6} more</div>}
+            </div>
+          )}
+
+          {errorMsg && <div className="error">{errorMsg}</div>}
+
+          <button type="submit" disabled={loading}>{loading ? 'Uploading...' : 'Upload'}</button>
+        </form>
+
+        <h2 className="heading">All Uploaded Data Projects</h2>
+        <div className="project-grid-compact">
+          {projects.map((p) => (
+            <div key={p._id} className="project-tile" onClick={() => openPreview(p)}>
+              <div className="tile-thumb">
+                {p.thumbnails && p.thumbnails.length ? (
+                  <img src={`https://project-drop.onrender.com${p.thumbnails[0]}`} alt="thumb" className="tile-thumb-img" />
+                ) : <div className="tile-thumb-empty">No image</div>}
+              </div>
+
+              <div className="tile-info">
+                <div className="tile-title">{p.title}</div>
+                <div className="tile-meta">{p.uploadedBy?.username || p.uploadedBy || 'Unknown'}</div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+
+        {previewProject && (
+          <div className="preview-overlay">
+            <div className="preview-card">
+              <div className="preview-header">
+                <div>
+                  <strong>{previewProject.title}</strong>
+                  <div className="preview-meta">
+                    {previewProject.uploadedBy?.username || previewProject.uploadedBy || 'Unknown'} • {new Date(previewProject.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <button className="btn small danger" onClick={closePreview}>✖</button>
+              </div>
+
+              <div className="preview-body">
+                {previewImage ? <img src={previewImage} alt="preview" className="preview-large" /> : <div className="no-preview">No image to preview</div>}
+
+                <div className="preview-thumbs">
+                  {previewProject.thumbnails?.map((img, i) => {
+                    const url = img.startsWith('http') ? img : `https://project-drop.onrender.com${img}`;
+                    return (
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`thumb-${i}`}
+                        className={`preview-thumb ${previewImage === url ? 'active' : ''}`}
+                        onClick={() => setPreviewImage(url)}
+                      />
+                    );
+                  })}
+                </div>
+
+                <div className="file-list">
+                  <h4>Files</h4>
+                  <ul>
+                    {previewProject.files?.length ? previewProject.files.map((f, i) => (
+                      <li key={i}>
+                        <span className="file-name">{f.split('/').pop()}</span>
+                        <button className="btn tiny" onClick={() => downloadUrl(f)}>Download</button>
+                      </li>
+                    )) : <li>No files uploaded.</li>}
+                  </ul>
+                </div>
+
+                <div className="zip-download">
+                  <button className="btn zip" onClick={() => downloadAllFiles(previewProject)}>⬇ Download ZIP</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-};
+}
 
 export default DataPage;
